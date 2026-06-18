@@ -1,0 +1,49 @@
+SQLite database program
+
+#include <stdio.h>
+#include <sqlite3.h>
+
+int main() {
+
+    sqlite3 *db;
+    char *err = 0;
+
+    sqlite3_open("student.db", &db);
+
+    sqlite3_exec(db,
+        "CREATE TABLE IF NOT EXISTS PERSON("
+        "NAME TEXT,"
+        "AGE INT);",
+        0,0,&err);
+
+    sqlite3_exec(db,"DELETE FROM PERSON;",0,0,&err);
+
+    sqlite3_exec(db,
+        "INSERT INTO PERSON VALUES('Alice',20);",
+        0,0,&err);
+
+    sqlite3_exec(db,
+        "INSERT INTO PERSON VALUES('Bob',22);",
+        0,0,&err);
+
+    sqlite3_stmt *stmt;
+
+    sqlite3_prepare_v2(db,
+        "SELECT * FROM PERSON;",
+        -1,&stmt,NULL);
+
+    printf("Name\tAge\n");
+
+    while(sqlite3_step(stmt)==SQLITE_ROW){
+
+        printf("%s\t%d\n",
+            sqlite3_column_text(stmt,0),
+            sqlite3_column_int(stmt,1));
+    }
+
+    sqlite3_finalize(stmt);
+
+    sqlite3_close(db);
+
+    return 0;
+}
