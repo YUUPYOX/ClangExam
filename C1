@@ -1,0 +1,164 @@
+#include "raylib.h"
+
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
+
+#define BRICK_ROWS 5
+#define BRICK_COLS 10
+
+typedef struct
+{
+    Rectangle rect;
+    bool active;
+    Color color;
+} Brick;
+
+int main()
+{
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rainbow Breakout");
+
+    SetTargetFPS(60);
+
+    Rectangle paddle = {350, 550, 120, 20};
+
+    Vector2 ball = {400, 300};
+    Vector2 speed = {5, -5};
+
+    int score = 0;
+    int lives = 5;
+
+    Brick bricks[BRICK_ROWS][BRICK_COLS];
+
+    Color rainbow[5] =
+    {
+        RED,
+        ORANGE,
+        YELLOW,
+        GREEN,
+        BLUE
+    };
+
+    for(int i = 0; i < BRICK_ROWS; i++)
+    {
+        for(int j = 0; j < BRICK_COLS; j++)
+        {
+            bricks[i][j].rect.x = 60 + j * 68;
+            bricks[i][j].rect.y = 50 + i * 30;
+            bricks[i][j].rect.width = 60;
+            bricks[i][j].rect.height = 20;
+            bricks[i][j].active = true;
+            bricks[i][j].color = rainbow[i];
+        }
+    }
+
+    while(!WindowShouldClose())
+    {       
+        // Move paddle
+        if (IsKeyDown(KEY_LEFT))
+            paddle.x -= 8;
+
+        if (IsKeyDown(KEY_RIGHT))
+            paddle.x += 8;
+
+        if (paddle.x < 0)
+            paddle.x = 0;
+
+        if (paddle.x + paddle.width > SCREEN_WIDTH)
+            paddle.x = SCREEN_WIDTH - paddle.width;
+
+        // Move ball
+        ball.x += speed.x;
+        ball.y += speed.y;
+
+        // Wall collision
+        if (ball.x < 10 || ball.x > SCREEN_WIDTH - 10)
+            speed.x *= -1;
+
+        if (ball.y < 10)
+            speed.y *= -1;
+
+        // Paddle collision
+        if (CheckCollisionCircleRec(ball, 10, paddle))
+            speed.y *= -1;
+
+        // Ball falls
+        if (ball.y > SCREEN_HEIGHT)
+        {
+            lives--;
+
+            ball.x = 400;
+            ball.y = 300;
+
+            speed.x = 5;
+            speed.y = -5;
+
+            paddle.x = 350;
+        }
+
+        // Brick collision
+        for (int i = 0; i < BRICK_ROWS; i++)
+        {
+            for (int j = 0; j < BRICK_COLS; j++)
+            {
+                if (bricks[i][j].active &&
+                    CheckCollisionCircleRec(ball, 10, bricks[i][j].rect))
+                {
+                    bricks[i][j].active = false;
+                    speed.y *= -1;
+                    score += 10;
+                }
+            }
+        }
+
+        BeginDrawing();
+
+        ClearBackground(BLACK);
+
+        DrawText(TextFormat("Score : %d", score), 20, 20, 25, WHITE);
+        DrawText(TextFormat("Lives : %d", lives), 650, 20, 25, WHITE);
+
+        DrawRectangleRec(paddle, WHITE);
+
+        DrawCircleV(ball, 10, WHITE);
+
+        for (int i = 0; i < BRICK_ROWS; i++)
+        {
+            for (int j = 0; j < BRICK_COLS; j++)
+            {
+                if (bricks[i][j].active)
+                    DrawRectangleRec(bricks[i][j].rect,
+                                     bricks[i][j].color);
+            }
+        }
+        // Check if all bricks are destroyed
+        bool win = true;
+
+        for (int i = 0; i < BRICK_ROWS; i++)
+        {
+            for (int j = 0; j < BRICK_COLS; j++)
+            {
+                if (bricks[i][j].active)
+                    win = false;
+            }
+        }
+
+        if (win)
+        {
+            DrawText("YOU WIN!", 280, 270, 50, GREEN);
+        }
+
+        if (lives <= 0)
+        {
+            DrawText("GAME OVER", 240, 270, 50, RED);
+        }
+
+        EndDrawing();
+
+        if (lives <= 0)
+            break;
+    }
+
+    CloseWindow();
+
+    return 0;
+}
