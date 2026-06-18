@@ -1,12 +1,5 @@
 # ClangExam
 
-## Student
-Computer Engineering
-
-## Description
-
-This repository contains four C programming assignments.
-
 ### C1
 Rainbow Breakout Game using Raylib.
 
