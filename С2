@@ -1,0 +1,30 @@
+#include <stdio.h>
+
+struct Student {
+    char name[20];
+    int math;
+    int english;
+};
+
+int main() {
+    struct Student s[2] = {
+        {"Alice", 90, 80},
+        {"Bob", 70, 100}
+    };
+
+    double studentAvg1 = (s[0].math + s[0].english) / 2.0;
+    double studentAvg2 = (s[1].math + s[1].english) / 2.0;
+
+    double mathAvg = (s[0].math + s[1].math) / 2.0;
+    double englishAvg = (s[0].english + s[1].english) / 2.0;
+
+    printf("Student Average\n");
+    printf("%s : %.1f\n", s[0].name, studentAvg1);
+    printf("%s : %.1f\n", s[1].name, studentAvg2);
+
+    printf("\nSubject Average\n");
+    printf("Math : %.1f\n", mathAvg);
+    printf("English : %.1f\n", englishAvg);
+
+    return 0;
+}
